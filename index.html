@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hi-Lo Card Counting Trainer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Hi-Lo Card Counting Trainer</h1>
+
+    <div class="counters">
+      <div><strong>Running Count:</strong> <span id="runningCount">0</span></div>
+      <div><strong>Decks Remaining:</strong> <span id="decksRemaining">6</span></div>
+      <div><strong>True Count:</strong> <span id="trueCount">0</span></div>
+    </div>
+
+    <div class="card-display">
+      <button id="drawCardBtn">Draw Card</button>
+      <div id="currentCard">🂠</div>
+    </div>
+
+    <div class="blackjack-section">
+      <h2>Mini Blackjack Game</h2>
+      <div class="hands">
+        <div>
+          <h3>Dealer</h3>
+          <div id="dealerHand" class="hand"></div>
+        </div>
+        <div>
+          <h3>Player</h3>
+          <div id="playerHand" class="hand"></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="newHandBtn">New Hand</button>
+        <button id="hitBtn" disabled>Hit</button>
+        <button id="standBtn" disabled>Stand</button>
+      </div>
+      <div id="resultMessage"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
