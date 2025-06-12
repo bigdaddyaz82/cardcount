@@ -1,7 +1,9 @@
+// --- EXISTING DECK AND COUNT VARIABLES ---
 let deck = [];
 let runningCount = 0;
 let decksRemaining = 6;
 
+// --- EXISTING DOM ELEMENT REFERENCES ---
 const runningCountEl = document.getElementById('runningCount');
 const decksRemainingEl = document.getElementById('decksRemaining');
 const trueCountEl = document.getElementById('trueCount');
@@ -15,11 +17,21 @@ const standBtn = document.getElementById('standBtn');
 const newHandBtn = document.getElementById('newHandBtn');
 const resultMessageEl = document.getElementById('resultMessage');
 
+// --- ADDED DOM ELEMENT REFERENCES ---
+const feedbackMessageEl = document.getElementById('feedbackMessage');
+const guessControlsEl = document.getElementById('guess-controls');
+const guessButtons = document.querySelectorAll('.guess-btn');
+const resetShoeBtn = document.getElementById('resetShoeBtn');
+
+// --- EXISTING BLACKJACK VARIABLES ---
 let playerHand = [];
 let dealerHand = [];
 let gameInProgress = false;
 
-// Unicode suits and card values
+// --- ADDED TRAINER-SPECIFIC VARIABLE ---
+let currentCardForTrainer = null; // Stores the card waiting for a guess
+
+// --- EXISTING DECK CREATION & UTILITY FUNCTIONS ---
 const suits = ['♠', '♥', '♦', '♣'];
 const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
@@ -36,28 +48,27 @@ function createDeck(numDecks = 6) {
 }
 
 function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
-
-function drawCard() {
-  if (deck.length === 0) {
-    deck = createDeck();
-    decksRemaining = 6;
-    runningCount = 0;
+  // Fisher-Yates shuffle is more robust
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
-  const card = deck.pop();
-  updateCounts(card);
-  updateDisplay(card);
-  return card;
+  return array;
 }
 
+// --- ADDED HELPER FUNCTION FOR CARD COUNT VALUE ---
+function getCardCountValue(card) {
+  const cardValue = card.value;
+  if (['2', '3', '4', '5', '6'].includes(cardValue)) return 1;
+  if (['10', 'J', 'Q', 'K', 'A'].includes(cardValue)) return -1;
+  return 0;
+}
+
+// --- MODIFIED & ORIGINAL COUNTING FUNCTIONS ---
+
+// This function is now used by the Blackjack game. The trainer will use it AFTER a guess.
 function updateCounts(card) {
-  let cardValue = card.value;
-  if (['2', '3', '4', '5', '6'].includes(cardValue)) {
-    runningCount++;
-  } else if (['10', 'J', 'Q', 'K', 'A'].includes(cardValue)) {
-    runningCount--;
-  }
+  runningCount += getCardCountValue(card);
   decksRemaining = Math.max(0.5, (deck.length / 52).toFixed(1));
   updateUI();
 }
@@ -69,13 +80,89 @@ function updateDisplay(card) {
 function updateUI() {
   runningCountEl.textContent = runningCount;
   decksRemainingEl.textContent = decksRemaining;
-  trueCountEl.textContent = Math.round(runningCount / decksRemaining);
+  // Prevent division by zero if decks remaining is 0
+  const trueCount = decksRemaining > 0 ? Math.round(runningCount / decksRemaining) : 0;
+  trueCountEl.textContent = trueCount;
 }
 
-// Blackjack game logic
+// --- ADDED: NEW INTERACTIVE TRAINER LOGIC ---
+function startTrainerCard() {
+  if (deck.length === 0) {
+    alert("Shoe is empty. Please reset the shoe.");
+    return;
+  }
+  
+  currentCardForTrainer = deck.pop();
+  updateDisplay(currentCardForTrainer);
+  
+  // Hide deal button, show guess controls
+  drawCardBtn.classList.add('hidden');
+  guessControlsEl.classList.remove('hidden');
+  feedbackMessageEl.textContent = ''; // Clear previous feedback
+}
+
+function handleGuess(e) {
+  const userGuess = parseInt(e.target.dataset.value, 10);
+  const correctValue = getCardCountValue(currentCardForTrainer);
+
+  if (userGuess === correctValue) {
+    feedbackMessageEl.textContent = "Correct!";
+    feedbackMessageEl.className = 'correct';
+  } else {
+    feedbackMessageEl.textContent = `Incorrect. The value was ${correctValue}.`;
+    feedbackMessageEl.className = 'incorrect';
+  }
+
+  // Now, update the official count
+  runningCount += correctValue;
+  decksRemaining = Math.max(0.5, (deck.length / 52).toFixed(1));
+  updateUI();
+
+  // Hide guess controls, show deal button
+  guessControlsEl.classList.add('hidden');
+  drawCardBtn.classList.remove('hidden');
+  
+  if (deck.length === 0) {
+      drawCardBtn.disabled = true;
+      feedbackMessageEl.textContent = "End of shoe! Please reset.";
+  }
+}
+
+function resetShoe() {
+    deck = createDeck();
+    runningCount = 0;
+    decksRemaining = 6;
+    currentCardForTrainer = null;
+    
+    updateUI();
+    currentCardEl.textContent = '🂠';
+    feedbackMessageEl.textContent = '';
+    
+    // Reset button visibility
+    guessControlsEl.classList.add('hidden');
+    drawCardBtn.classList.remove('hidden');
+    drawCardBtn.disabled = false;
+    
+    console.log("Shoe has been reset.");
+}
+
+// --- UNCHANGED BLACKJACK GAME LOGIC ---
+function drawCard() {
+  if (deck.length === 0) {
+    alert("Shoe is empty! Please reset.");
+    return null; // Handle empty deck case for blackjack
+  }
+  const card = deck.pop();
+  updateCounts(card); // Blackjack updates count immediately
+  // Note: The main card display is NOT updated by the blackjack game
+  return card;
+}
+
 function dealCardTo(hand) {
   const card = drawCard();
-  hand.push(card);
+  if (card) {
+      hand.push(card);
+  }
   return card;
 }
 
@@ -121,6 +208,11 @@ function checkWinner() {
 }
 
 function startNewHand() {
+  // Ensure there are enough cards to play a hand
+  if (deck.length < 10) {
+      alert("Not enough cards to play. Please reset the shoe.");
+      return;
+  }
   playerHand = [];
   dealerHand = [];
   resultMessageEl.textContent = '';
@@ -161,12 +253,34 @@ function endGame() {
   checkWinner();
 }
 
-// Event listeners
-drawCardBtn.addEventListener('click', () => drawCard());
-newHandBtn.addEventListener('click', () => startNewHand());
-hitBtn.addEventListener('click', () => playerHits());
-standBtn.addEventListener('click', () => endGame());
 
-// Initialize
-deck = createDeck();
-updateUI();
+// --- UPDATED & NEW EVENT LISTENERS ---
+// The main card button now starts the interactive trainer round
+drawCardBtn.addEventListener('click', startTrainerCard);
+
+// The reset button calls the new reset function
+resetShoeBtn.addEventListener('click', resetShoe);
+
+// Add listeners to all guess buttons
+guessButtons.forEach(button => {
+  button.addEventListener('click', handleGuess);
+});
+
+
+// --- UNCHANGED BLACKJACK LISTENERS ---
+newHandBtn.addEventListener('click', startNewHand);
+hitBtn.addEventListener('click', playerHits);
+standBtn.addEventListener('click', endGame);
+
+
+// --- INITIALIZATION ---
+function initializeApp() {
+    deck = createDeck();
+    updateUI();
+    // Hide the guess controls on startup
+    guessControlsEl.classList.add('hidden');
+    console.log("Card counting trainer initialized.");
+}
+
+// Start the app
+initializeApp();
