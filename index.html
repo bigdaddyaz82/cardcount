@@ -41,13 +41,12 @@
       <div><strong>Points:</strong> <span id="playerPoints">1000</span></div>
     </div>
 
-    <div id="timer-container" class="timer-container hidden">
-      <div id="timer-bar" class="timer-bar"></div>
-    </div>
+    <div id="timer-container" class="timer-container"></div>
 
     <div class="card-display">
       <div id="currentCard">🂠</div>
       <div id="feedbackMessage">Select settings and press 'Reset Shoe' to begin!</div>
+      <!-- This container holds the buttons -->
       <div id="guess-controls" class="guess-controls hidden">
         <button class="guess-btn" data-value="1">+1</button>
         <button class="guess-btn" data-value="0">0</button>
@@ -55,7 +54,7 @@
       </div>
     </div>
 
-    <div class="main-trainer-controls">
+    <div id="main-trainer-controls" class="main-trainer-controls">
       <button id="drawCardBtn" disabled>Start Training</button>
       <button id="resetShoeBtn">Reset Shoe</button>
     </div>
@@ -90,7 +89,7 @@
       </div>
     </div>
 
-    <!-- How to Play Modal (Starts hidden as it should) -->
+    <!-- How to Play Modal (Starts hidden) -->
     <div id="how-to-play-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 style="margin-top:0;">How to Play</h2>
