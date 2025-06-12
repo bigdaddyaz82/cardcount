@@ -51,7 +51,7 @@ hr {
   margin: 30px 0;
 }
 .hidden {
-    display: none;
+    display: none !important;
 }
 .settings {
   display: flex;
@@ -170,7 +170,7 @@ hr {
   align-items: center;
   border: 2px solid #1a1a2a;
 }
-.main-trainer-controls, .controls, .guess-btn, #close-how-to-play-btn {
+.main-trainer-controls, .controls button, .guess-btn, #close-how-to-play-btn {
     border-radius: 8px;
     border: none;
     cursor: pointer;
