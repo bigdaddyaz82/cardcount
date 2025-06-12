@@ -10,18 +10,31 @@
   <div class="container">
     <h1>Hi-Lo Card Counting Trainer</h1>
 
+    <!-- ADDED: Settings section for deck selection -->
+    <div class="settings">
+      <label for="deck-count-selector">Number of Decks:</label>
+      <select id="deck-count-selector">
+        <option value="1">1 Deck</option>
+        <option value="2">2 Decks</option>
+        <option value="4">4 Decks</option>
+        <option value="6" selected>6 Decks (Standard)</option>
+        <option value="8">8 Decks</option>
+      </select>
+    </div>
+
     <div class="counters">
       <div><strong>Running Count:</strong> <span id="runningCount">0</span></div>
+      <div><strong>Decks Remaining:</strong> <span id="decksRemaining">6</span></div> <!-- ADDED BACK: Essential for True Count context -->
       <div><strong>True Count:</strong> <span id="trueCount">0</span></div>
-      <div><strong>Points:</strong> <span id="playerPoints">1000</span></div> <!-- ADDED: Points Display -->
-      <div><strong>Streak:</strong> <span id="streakCounter">0</span></div> <!-- ADDED: Streak Counter -->
+      <div><strong>Points:</strong> <span id="playerPoints">1000</span></div>
+      <div><strong>Streak:</strong> <span id="streakCounter">0</span></div>
     </div>
 
     <div class="card-display">
       <div id="currentCard">🂠</div>
-      <div id="feedbackMessage">First, practice counting. A correct guess earns points!</div> <!-- Updated Text -->
+      <div id="feedbackMessage">Select deck count and press 'Reset Shoe' to begin!</div> <!-- Updated Text -->
 
-      <div id="guess-controls" class="guess-controls hidden"> <!-- Now hidden by default -->
+      <div id="guess-controls" class="guess-controls hidden">
         <p>What is the card's value?</p>
         <button class="guess-btn" data-value="1">+1</button>
         <button class="guess-btn" data-value="0">0</button>
@@ -30,7 +43,7 @@
     </div>
 
     <div class="main-trainer-controls">
-      <button id="drawCardBtn">Start Training</button> <!-- Updated Text -->
+      <button id="drawCardBtn" disabled>Start Training</button> <!-- Disabled until reset -->
       <button id="resetShoeBtn">Reset Shoe</button>
     </div>
 
@@ -49,7 +62,6 @@
         </div>
       </div>
       
-      <!-- ADDED: Betting controls for Blackjack -->
       <div class="betting-controls">
         <label for="betAmount">Your Bet:</label>
         <input type="number" id="betAmount" value="10" min="10" step="5">
