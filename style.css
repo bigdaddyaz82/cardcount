@@ -123,3 +123,71 @@ button:disabled {
   margin-top: 10px;
   color: #ffdd57;
 }
+
+/* === ADDED STYLES START HERE === */
+
+/* Main trainer control buttons container */
+.main-trainer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Adds space between the buttons */
+    margin-bottom: 25px;
+}
+
+/* Style for the new "Reset Shoe" button */
+#resetShoeBtn {
+    background-color: #d9534f; /* A distinct red color for reset */
+}
+#resetShoeBtn:hover {
+    background-color: #c9302c;
+}
+
+/* Styling for the feedback message area */
+#feedbackMessage {
+    min-height: 25px; /* Prevents layout shift when text appears */
+    margin-top: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* Colors for the feedback text */
+.correct {
+    color: #5cb85c; /* Green */
+}
+.incorrect {
+    color: #d9534f; /* Red */
+}
+
+/* Container for the guess buttons */
+.guess-controls {
+    margin-top: 15px;
+    padding: 10px;
+}
+
+.guess-controls p {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+/* Individual guess buttons */
+.guess-btn {
+    background: #337ab7; /* A neutral blue */
+    padding: 12px 25px;
+    margin: 0 5px;
+}
+
+.guess-btn:hover {
+    background: #286090;
+}
+
+/* Horizontal rule to separate sections */
+hr {
+    border: none;
+    border-top: 2px solid #555;
+    margin: 40px 0;
+}
+
+/* Utility class to hide elements - you'll need this for the JS logic */
+.hidden {
+    display: none;
+}
