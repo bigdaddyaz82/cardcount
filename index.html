@@ -12,17 +12,16 @@
 
     <div class="counters">
       <div><strong>Running Count:</strong> <span id="runningCount">0</span></div>
-      <div><strong>Decks Remaining:</strong> <span id="decksRemaining">6</span></div>
       <div><strong>True Count:</strong> <span id="trueCount">0</span></div>
+      <div><strong>Points:</strong> <span id="playerPoints">1000</span></div> <!-- ADDED: Points Display -->
+      <div><strong>Streak:</strong> <span id="streakCounter">0</span></div> <!-- ADDED: Streak Counter -->
     </div>
 
-    <!-- The card display section is now enhanced with the new elements -->
     <div class="card-display">
       <div id="currentCard">🂠</div>
-      <div id="feedbackMessage"></div> <!-- ADDED: Area for "Correct!" or "Incorrect!" messages -->
+      <div id="feedbackMessage">First, practice counting. A correct guess earns points!</div> <!-- Updated Text -->
 
-      <!-- ADDED: Container for the new guess buttons -->
-      <div id="guess-controls" class="guess-controls">
+      <div id="guess-controls" class="guess-controls hidden"> <!-- Now hidden by default -->
         <p>What is the card's value?</p>
         <button class="guess-btn" data-value="1">+1</button>
         <button class="guess-btn" data-value="0">0</button>
@@ -30,13 +29,12 @@
       </div>
     </div>
 
-    <!-- All main controls are grouped here -->
     <div class="main-trainer-controls">
-      <button id="drawCardBtn">Deal Next Card</button>
-      <button id="resetShoeBtn">Reset Shoe</button> <!-- ADDED: Button to reset the main trainer -->
+      <button id="drawCardBtn">Start Training</button> <!-- Updated Text -->
+      <button id="resetShoeBtn">Reset Shoe</button>
     </div>
 
-    <hr> <!-- ADDED: A horizontal rule to visually separate the trainer from the game -->
+    <hr>
 
     <div class="blackjack-section">
       <h2>Mini Blackjack Game</h2>
@@ -50,6 +48,13 @@
           <div id="playerHand" class="hand"></div>
         </div>
       </div>
+      
+      <!-- ADDED: Betting controls for Blackjack -->
+      <div class="betting-controls">
+        <label for="betAmount">Your Bet:</label>
+        <input type="number" id="betAmount" value="10" min="10" step="5">
+      </div>
+
       <div class="controls">
         <button id="newHandBtn">New Hand</button>
         <button id="hitBtn" disabled>Hit</button>
