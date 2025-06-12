@@ -25,12 +25,13 @@ const difficultySettings = {
 };
 
 // --- DOM ELEMENT REFERENCES ---
+// These are all declared here so the script knows what to find in the HTML
 const runningCountEl = document.getElementById('runningCount');
 const trueCountEl = document.getElementById('trueCount');
 const decksRemainingEl = document.getElementById('decksRemaining');
 const playerPointsEl = document.getElementById('playerPoints');
 const streakCounterEl = document.getElementById('streakCounter');
-const highStreakCounterEl = document.getElementById('highStreakCounter');
+const highStreakCounterEl = document.getElementById('highStreakCounter'); // This was the element causing the crash
 const currentCardEl = document.getElementById('currentCard');
 const feedbackMessageEl = document.getElementById('feedbackMessage');
 const guessControlsEl = document.getElementById('guess-controls');
@@ -40,14 +41,10 @@ const deckCountSelectorEl = document.getElementById('deck-count-selector');
 const timerContainerEl = document.getElementById('timer-container');
 const timerBarEl = document.getElementById('timer-bar');
 const betAmountEl = document.getElementById('betAmount');
-
-// Quiz Modal Elements
 const quizModalEl = document.getElementById('betting-quiz-modal');
 const quizQuestionEl = document.getElementById('quiz-question');
 const quizOptionsEl = document.getElementById('quiz-options');
 const quizFeedbackEl = document.getElementById('quiz-feedback');
-
-// How to Play Modal Elements
 const howToPlayBtn = document.getElementById('how-to-play-btn');
 const howToPlayModal = document.getElementById('how-to-play-modal');
 const closeHowToPlayBtn = document.getElementById('close-how-to-play-btn');
@@ -59,22 +56,13 @@ function createDeck(numDecks) {
     const suits = ['♠', '♣', '♥', '♦'];
     const values = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
     let newDeck = [];
-    for (let i = 0; i < numDecks; i++) {
-        for (const suit of suits) {
-            for (const value of values) {
-                newDeck.push({ value, suit });
-            }
-        }
-    }
+    for (let i = 0; i < numDecks; i++) { for (const suit of suits) { for (const value of values) { newDeck.push({ value, suit }); } } }
     return shuffle(newDeck);
 }
 
 function shuffle(array) {
     const shuffledArray = [...array];
-    for (let i = shuffledArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
-    }
+    for (let i = shuffledArray.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]]; }
     return shuffledArray;
 }
 
@@ -172,10 +160,7 @@ function handleGuess(e) {
 
     if (userGuess === correctValue) {
         streak++;
-        if (streak > highStreak) {
-            highStreak = streak;
-            localStorage.setItem('cardCounterHighStreak', highStreak);
-        }
+        if (streak > highStreak) { highStreak = streak; localStorage.setItem('cardCounterHighStreak', highStreak); }
         cardsSinceLastQuiz++;
         playerPoints += 10;
         feedbackMessageEl.textContent = `Correct! +10 Points`;
@@ -241,40 +226,23 @@ function startBettingQuiz() {
 function generateBetOptions(trueCount) {
     const tableMin = 10;
     let correctBet;
-
-    if (trueCount > 1) {
-        const calculatedBet = (trueCount - 1) * tableMin;
-        correctBet = Math.min(tableMin * 10, calculatedBet);
-    } else {
-        correctBet = tableMin;
-    }
-    
+    if (trueCount > 1) { const calculatedBet = (trueCount - 1) * tableMin; correctBet = Math.min(tableMin * 10, calculatedBet); } else { correctBet = tableMin; }
     let decoyPool = [tableMin, tableMin * 2, tableMin * 3, tableMin * 5, tableMin * 8, tableMin * 10];
     decoyPool = decoyPool.filter(bet => bet !== correctBet);
     const shuffledDecoys = shuffle(decoyPool);
     const decoys = shuffledDecoys.slice(0, 2);
-
     let options = [{ bet: correctBet, isCorrect: true }];
-    decoys.forEach(decoyBet => {
-        options.push({ bet: decoyBet, isCorrect: false });
-    });
-
+    decoys.forEach(decoyBet => { options.push({ bet: decoyBet, isCorrect: false }); });
     return shuffle(options);
 }
 
 function handleQuizAnswer(chosenOption, allOptions) {
     const correctOption = allOptions.find(opt => opt.isCorrect);
-
     quizOptionsEl.querySelectorAll('button').forEach(btn => {
         btn.disabled = true;
         const optionValue = parseInt(btn.textContent.slice(1));
-        if (optionValue === correctOption.bet) {
-            btn.classList.add('correct-answer');
-        } else if (optionValue === chosenOption.bet) {
-            btn.classList.add('wrong-answer');
-        }
+        if (optionValue === correctOption.bet) { btn.classList.add('correct-answer'); } else if (optionValue === chosenOption.bet) { btn.classList.add('wrong-answer'); }
     });
-
     if (chosenOption.isCorrect) {
         playerPoints += 100;
         quizFeedbackEl.textContent = 'Correct! This is the optimal bet. +100 Points!';
@@ -284,44 +252,36 @@ function handleQuizAnswer(chosenOption, allOptions) {
         quizFeedbackEl.textContent = 'Incorrect. A poor betting decision is costly.';
         quizFeedbackEl.className = 'quiz-feedback incorrect';
     }
-
     updateUI();
     cardsSinceLastQuiz = 0;
-    
-    setTimeout(() => {
-        isQuizActive = false;
-        quizModalEl.classList.add('hidden');
-        startTrainerCard();
-    }, 2500);
+    setTimeout(() => { isQuizActive = false; quizModalEl.classList.add('hidden'); startTrainerCard(); }, 2500);
 }
 
 // --- INITIALIZATION ---
+// This function runs once when the page loads.
 function initializeApp() {
     // Load high score from browser storage
     highStreak = parseInt(localStorage.getItem('cardCounterHighStreak')) || 0;
 
-    // Event Listeners for Trainer
+    // Set up all the button clicks
     deckCountSelectorEl.addEventListener('change', resetShoe);
     document.querySelectorAll('input[name="difficulty"]').forEach(radio => radio.addEventListener('change', resetShoe));
     drawCardBtn.addEventListener('click', startTrainerCard);
     resetShoeBtn.addEventListener('click', resetShoe);
     guessControlsEl.addEventListener('click', handleGuess);
     
-    // --- CORRECTED AND SIMPLIFIED MODAL LISTENERS ---
-    // This is the guaranteed working version.
-    
-    // 1. Show the modal when the '?' button is clicked.
+    // --- GUARANTEED WORKING MODAL LISTENERS ---
     howToPlayBtn.addEventListener('click', () => {
         howToPlayModal.classList.remove('hidden');
     });
 
-    // 2. Hide the modal when the 'Close' button is clicked.
     closeHowToPlayBtn.addEventListener('click', () => {
         howToPlayModal.classList.add('hidden');
     });
 
+    // Start the app for the first time
     resetShoe();
 }
 
-// Run the app after everything is defined
+// Run the app
 initializeApp();
