@@ -1,26 +1,24 @@
-// This 'DOMContentLoaded' event ensures that all the HTML is loaded before the script runs.
-// This is the key to preventing the script from crashing.
+// This event listener is the most important part.
+// It ensures that NO JavaScript code runs until the entire HTML page is loaded and ready.
+// This prevents the script from crashing because it can't find an element.
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- DECK AND COUNT VARIABLES ---
+    // --- All variables and element references are now safely inside this event listener ---
+    
+    // GAME STATE VARIABLES
     let deck = [];
     let runningCount = 0;
     let totalDecks = 6;
     let cardsSinceLastQuiz = 0;
-
-    // --- GAME STATE VARIABLES ---
     let playerPoints = 1000;
     let streak = 0;
     let highStreak = 0;
     let trainerGameOver = false;
-
-    // --- QUIZ VARIABLES ---
-    const BET_QUIZ_INTERVAL = 15;
     let isQuizActive = false;
-
-    // --- DIFFICULTY & TIMER VARIABLES ---
+    let currentCardForTrainer = null;
     let difficulty = 'beginner';
     let timerId = null;
+
     const difficultySettings = {
         beginner:     { time: 4000, autoDeal: 1200, penalty: 'none' },
         intermediate: { time: 2500, autoDeal: 1000, penalty: 'gameover' },
@@ -28,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         professional: { time: 1000, autoDeal: 500,  penalty: 'gameover' }
     };
 
-    // --- DOM ELEMENT REFERENCES ---
+    // DOM ELEMENT REFERENCES
     const runningCountEl = document.getElementById('runningCount');
     const trueCountEl = document.getElementById('trueCount');
     const decksRemainingEl = document.getElementById('decksRemaining');
@@ -43,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const deckCountSelectorEl = document.getElementById('deck-count-selector');
     const timerContainerEl = document.getElementById('timer-container');
     const timerBarEl = document.getElementById('timer-bar');
-    const betAmountEl = document.getElementById('betAmount');
+    const mainControlsEl = document.getElementById('main-trainer-controls');
     const quizModalEl = document.getElementById('betting-quiz-modal');
     const quizQuestionEl = document.getElementById('quiz-question');
     const quizOptionsEl = document.getElementById('quiz-options');
@@ -52,8 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const howToPlayModal = document.getElementById('how-to-play-modal');
     const closeHowToPlayBtn = document.getElementById('close-how-to-play-btn');
 
-    // --- CARD & DECK LOGIC ---
-    let currentCardForTrainer = null;
+    // --- CORE FUNCTIONS ---
 
     function createDeck(numDecks) {
         const suits = ['♠', '♣', '♥', '♦'];
@@ -82,8 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const decksRemaining = Math.max(0.5, deck.length / 52);
         return Math.round(runningCount / decksRemaining);
     }
+    
+    // --- UI UPDATE AND STATE MANAGEMENT ---
 
-    // --- UI & STATE UPDATE ---
     function updateUI() {
         runningCountEl.textContent = runningCount;
         trueCountEl.textContent = calculateTrueCount();
@@ -91,26 +89,44 @@ document.addEventListener('DOMContentLoaded', () => {
         playerPointsEl.textContent = playerPoints;
         streakCounterEl.textContent = streak;
         highStreakCounterEl.textContent = highStreak;
-        betAmountEl.disabled = !guessControlsEl.classList.contains('hidden') || isQuizActive;
     }
 
+    function showGuessingUI() {
+        mainControlsEl.classList.add('hidden');
+        guessControlsEl.classList.remove('hidden');
+    }
+
+    function showMainButtonsUI() {
+        mainControlsEl.classList.remove('hidden');
+        guessControlsEl.classList.add('hidden');
+    }
+    
     // --- TIMER LOGIC ---
+
     function startTimer() {
-        if (isQuizActive) return;
-        timerContainerEl.classList.remove('hidden');
-        timerBarEl.style.transition = 'none';
-        timerBarEl.style.width = '100%';
-        void timerBarEl.offsetWidth;
+        timerContainerEl.style.visibility = 'visible';
+        // Reset the bar
+        if (!timerBarEl.firstElementChild) {
+            timerBarEl.innerHTML = '<div></div>';
+        }
+        const bar = timerBarEl.firstElementChild;
+        bar.style.transition = 'none';
+        bar.style.width = '100%';
+        
+        // This forces the browser to apply the style change before starting the transition
+        void bar.offsetWidth;
+
         const level = difficultySettings[difficulty];
-        timerBarEl.style.transition = `width ${level.time / 1000}s linear`;
-        timerBarEl.style.width = '0%';
+        bar.style.transition = `width ${level.time / 1000}s linear`;
+        bar.style.width = '0%';
+        
         timerId = setTimeout(handleTimeout, level.time);
     }
 
     function stopTimer() {
         clearTimeout(timerId);
         timerId = null;
-        timerContainerEl.classList.add('hidden');
+        timerContainerEl.style.visibility = 'hidden';
     }
 
     function handleTimeout() {
@@ -118,13 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const correctValue = getCardCountValue(currentCardForTrainer);
         stopTimer();
         if (level.penalty === 'gameover') {
-            trainerGameOver = true;
-            feedbackMessageEl.textContent = `Time's up! Game Over. Final Streak: ${streak}`;
-            feedbackMessageEl.className = 'incorrect';
-            guessControlsEl.classList.add('hidden');
-            drawCardBtn.classList.remove('hidden');
-            drawCardBtn.disabled = true;
-            streak = 0;
+            endGame(`Time's up! Game Over. Final Streak: ${streak}`);
         } else {
             feedbackMessageEl.textContent = `Time's up! The card value was ${correctValue}.`;
             feedbackMessageEl.className = 'incorrect';
@@ -133,21 +143,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateUI();
     }
+    
+    // --- GAME FLOW LOGIC ---
 
-    // --- INTERACTIVE TRAINER LOGIC ---
     function startTrainerCard() {
         if (deck.length === 0) {
-            feedbackMessageEl.textContent = "Shoe depleted! Reset to play again.";
-            guessControlsEl.classList.add('hidden');
-            drawCardBtn.disabled = true;
+            endGame("Shoe depleted! Reset to play again.");
             return;
         }
-        trainerGameOver = false;
         currentCardForTrainer = deck.pop();
         currentCardEl.textContent = `${currentCardForTrainer.value}${currentCardForTrainer.suit}`;
-        drawCardBtn.classList.add('hidden');
-        guessControlsEl.classList.remove('hidden');
         feedbackMessageEl.textContent = '';
+        showGuessingUI(); // Show the +1, 0, -1 buttons
         updateUI();
         startTimer();
     }
@@ -174,15 +181,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(startTrainerCard, difficultySettings[difficulty].autoDeal);
             }
         } else {
-            trainerGameOver = true;
-            feedbackMessageEl.textContent = `Incorrect! Game Over. Final Streak: ${streak}`;
-            feedbackMessageEl.className = 'incorrect';
-            guessControlsEl.classList.add('hidden');
-            drawCardBtn.classList.remove('hidden');
-            drawCardBtn.disabled = true;
-            streak = 0;
+            const level = difficultySettings[difficulty];
+            if (level.penalty === 'gameover') {
+                endGame(`Incorrect! Game Over. Final Streak: ${streak}`);
+            } else {
+                feedbackMessageEl.textContent = 'Incorrect! Try again.';
+                feedbackMessageEl.className = 'incorrect';
+                setTimeout(startTrainerCard, 1500);
+            }
         }
         updateUI();
+    }
+
+    function endGame(message) {
+        trainerGameOver = true;
+        feedbackMessageEl.textContent = message;
+        feedbackMessageEl.className = 'incorrect';
+        streak = 0;
+        showMainButtonsUI();
+        drawCardBtn.disabled = true; // Disable start until reset
+        stopTimer();
     }
 
     function resetShoe() {
@@ -195,21 +213,21 @@ document.addEventListener('DOMContentLoaded', () => {
         cardsSinceLastQuiz = 0;
         trainerGameOver = false;
         isQuizActive = false;
+        
         quizModalEl.classList.add('hidden');
         currentCardEl.textContent = '🂠';
-        feedbackMessageEl.textContent = 'Select settings and press "Start Training" to begin!';
+        feedbackMessageEl.textContent = 'Select settings and press "Reset Shoe" to begin!';
         feedbackMessageEl.className = '';
-        drawCardBtn.classList.remove('hidden');
-        drawCardBtn.disabled = false;
-        guessControlsEl.classList.add('hidden');
-        timerContainerEl.classList.add('hidden');
+        
+        showMainButtonsUI();
+        drawCardBtn.disabled = false; // Enable start button
         updateUI();
     }
 
     // --- BETTING QUIZ LOGIC ---
     function startBettingQuiz() {
         isQuizActive = true;
-        guessControlsEl.classList.add('hidden');
+        stopTimer();
         const trueCount = calculateTrueCount();
         quizQuestionEl.textContent = `The True Count is ${trueCount}. What's your bet?`;
         quizOptionsEl.innerHTML = '';
@@ -261,26 +279,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- INITIALIZATION ---
-    // Load high score from browser storage
-    highStreak = parseInt(localStorage.getItem('cardCounterHighStreak')) || 0;
+    function initializeApp() {
+        highStreak = parseInt(localStorage.getItem('cardCounterHighStreak')) || 0;
 
-    // Set up all the button clicks
-    deckCountSelectorEl.addEventListener('change', resetShoe);
-    document.querySelectorAll('input[name="difficulty"]').forEach(radio => radio.addEventListener('change', resetShoe));
-    drawCardBtn.addEventListener('click', startTrainerCard);
-    resetShoeBtn.addEventListener('click', resetShoe);
-    guessControlsEl.addEventListener('click', handleGuess);
-    
-    // GUARANTEED WORKING MODAL LISTENERS
-    howToPlayBtn.addEventListener('click', () => {
-        howToPlayModal.classList.remove('hidden');
-    });
+        deckCountSelectorEl.addEventListener('change', resetShoe);
+        document.querySelectorAll('input[name="difficulty"]').forEach(radio => radio.addEventListener('change', resetShoe));
+        drawCardBtn.addEventListener('click', startTrainerCard);
+        resetShoeBtn.addEventListener('click', resetShoe);
+        guessControlsEl.addEventListener('click', handleGuess);
+        
+        howToPlayBtn.addEventListener('click', () => { howToPlayModal.classList.remove('hidden'); });
+        closeHowToPlayBtn.addEventListener('click', () => { howToPlayModal.classList.add('hidden'); });
 
-    closeHowToPlayBtn.addEventListener('click', () => {
-        howToPlayModal.classList.add('hidden');
-    });
+        resetShoe();
+    }
 
-    // Start the app for the first time
-    resetShoe();
+    // Run the app!
+    initializeApp();
     
 });
