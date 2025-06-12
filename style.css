@@ -30,11 +30,38 @@ h1, h2, h3 {
   color: #00ffff;
 }
 
+/* === ADDED: Settings section styles === */
+.settings {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #333;
+  border-radius: 10px;
+}
+
+.settings label {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.settings select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #444;
+  background-color: #1a1a2a;
+  color: #f2f2f2;
+  font-size: 1em;
+  cursor: pointer;
+}
+
 .counters {
   display: flex;
-  justify-content: space-around; /* Changed to space-around for even spacing */
-  flex-wrap: wrap; /* Allows items to wrap on smaller screens */
-  gap: 10px; /* Adds space between counter items */
+  justify-content: space-around;
+  flex-wrap: wrap; 
+  gap: 10px; 
   margin-bottom: 25px;
   font-size: 1.2em;
   padding: 10px;
@@ -56,7 +83,6 @@ h1, h2, h3 {
   font-size: 1em;
   border-radius: 10px;
   cursor: pointer;
-  /* margin-bottom: 15px; */ /* Removed to let control container handle it */
   transition: background 0.2s ease-in-out;
 }
 
@@ -126,8 +152,6 @@ button:disabled {
   color: #ffdd57;
 }
 
-/* === ADDED & UPDATED STYLES START HERE === */
-
 .main-trainer-controls {
     display: flex;
     justify-content: center;
@@ -183,7 +207,6 @@ hr {
     margin: 40px 0;
 }
 
-/* ADDED: Betting controls styling */
 .betting-controls {
     display: flex;
     justify-content: center;
