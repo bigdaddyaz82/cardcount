@@ -307,21 +307,21 @@ function initializeApp() {
     resetShoeBtn.addEventListener('click', resetShoe);
     guessControlsEl.addEventListener('click', handleGuess);
     
-    // --- CORRECTED MODAL LOGIC ---
-    // Show the "How to Play" modal
+    // --- CORRECTED AND SIMPLIFIED MODAL LISTENERS ---
+    // This is the guaranteed working version.
+    
+    // 1. Show the modal when the '?' button is clicked.
     howToPlayBtn.addEventListener('click', () => {
         howToPlayModal.classList.remove('hidden');
     });
 
-    // Listen for clicks on the modal overlay itself
-    howToPlayModal.addEventListener('click', (e) => {
-        // If the user clicked the close button OR the dark background, hide the modal
-        if (e.target.id === 'close-how-to-play-btn' || e.target.id === 'how-to-play-modal') {
-            howToPlayModal.classList.add('hidden');
-        }
+    // 2. Hide the modal when the 'Close' button is clicked.
+    closeHowToPlayBtn.addEventListener('click', () => {
+        howToPlayModal.classList.add('hidden');
     });
 
     resetShoe();
 }
 
+// Run the app after everything is defined
 initializeApp();
