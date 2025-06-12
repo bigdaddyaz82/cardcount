@@ -41,7 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const deckCountSelectorEl = document.getElementById('deck-count-selector');
     const timerContainerEl = document.getElementById('timer-container');
     const timerBarEl = document.getElementById('timer-bar');
-    const mainControlsEl = document.getElementById('main-trainer-controls');
+    // --- THIS WAS THE MISSING LINE ---
+    const mainControlsEl = document.getElementById('main-trainer-controls'); 
+    // ---------------------------------
     const quizModalEl = document.getElementById('betting-quiz-modal');
     const quizQuestionEl = document.getElementById('quiz-question');
     const quizOptionsEl = document.getElementById('quiz-options');
@@ -105,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startTimer() {
         timerContainerEl.style.visibility = 'visible';
-        // Reset the bar
+        // Create the timer bar element if it doesn't exist
         if (!timerBarEl.firstElementChild) {
             timerBarEl.innerHTML = '<div></div>';
         }
@@ -113,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
         bar.style.transition = 'none';
         bar.style.width = '100%';
         
-        // This forces the browser to apply the style change before starting the transition
         void bar.offsetWidth;
 
         const level = difficultySettings[difficulty];
@@ -151,10 +152,11 @@ document.addEventListener('DOMContentLoaded', () => {
             endGame("Shoe depleted! Reset to play again.");
             return;
         }
+        trainerGameOver = false;
         currentCardForTrainer = deck.pop();
         currentCardEl.textContent = `${currentCardForTrainer.value}${currentCardForTrainer.suit}`;
         feedbackMessageEl.textContent = '';
-        showGuessingUI(); // Show the +1, 0, -1 buttons
+        showGuessingUI();
         updateUI();
         startTimer();
     }
@@ -199,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackMessageEl.className = 'incorrect';
         streak = 0;
         showMainButtonsUI();
-        drawCardBtn.disabled = true; // Disable start until reset
+        drawCardBtn.disabled = true;
         stopTimer();
     }
 
@@ -215,12 +217,12 @@ document.addEventListener('DOMContentLoaded', () => {
         isQuizActive = false;
         
         quizModalEl.classList.add('hidden');
-        currentCardEl.textContent = '🂠';
-        feedbackMessageEl.textContent = 'Select settings and press "Reset Shoe" to begin!';
+        currentCardEl.innerHTML = ``; // Card back emoji
+        feedbackMessageEl.textContent = 'Select settings and press "Start Training" to begin!';
         feedbackMessageEl.className = '';
         
         showMainButtonsUI();
-        drawCardBtn.disabled = false; // Enable start button
+        drawCardBtn.disabled = false;
         updateUI();
     }
 
@@ -294,7 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
         resetShoe();
     }
 
-    // Run the app!
     initializeApp();
     
 });
