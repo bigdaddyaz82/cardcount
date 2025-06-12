@@ -252,7 +252,7 @@ function generateBetOptions(trueCount) {
     let decoyPool = [tableMin, tableMin * 2, tableMin * 3, tableMin * 5, tableMin * 8, tableMin * 10];
     decoyPool = decoyPool.filter(bet => bet !== correctBet);
     const shuffledDecoys = shuffle(decoyPool);
-    const decoys = shuffledDecoys.slice(0, 2); // Take 2 decoys
+    const decoys = shuffledDecoys.slice(0, 2);
 
     let options = [{ bet: correctBet, isCorrect: true }];
     decoys.forEach(decoyBet => {
@@ -265,7 +265,6 @@ function generateBetOptions(trueCount) {
 function handleQuizAnswer(chosenOption, allOptions) {
     const correctOption = allOptions.find(opt => opt.isCorrect);
 
-    // Disable all buttons and apply visual feedback
     quizOptionsEl.querySelectorAll('button').forEach(btn => {
         btn.disabled = true;
         const optionValue = parseInt(btn.textContent.slice(1));
@@ -308,9 +307,19 @@ function initializeApp() {
     resetShoeBtn.addEventListener('click', resetShoe);
     guessControlsEl.addEventListener('click', handleGuess);
     
-    // How To Play Modal Listeners
-    howToPlayBtn.addEventListener('click', () => howToPlayModal.classList.remove('hidden'));
-    closeHowToPlayBtn.addEventListener('click', () => howToPlayModal.classList.add('hidden'));
+    // --- CORRECTED MODAL LOGIC ---
+    // Show the "How to Play" modal
+    howToPlayBtn.addEventListener('click', () => {
+        howToPlayModal.classList.remove('hidden');
+    });
+
+    // Listen for clicks on the modal overlay itself
+    howToPlayModal.addEventListener('click', (e) => {
+        // If the user clicked the close button OR the dark background, hide the modal
+        if (e.target.id === 'close-how-to-play-btn' || e.target.id === 'how-to-play-modal') {
+            howToPlayModal.classList.add('hidden');
+        }
+    });
 
     resetShoe();
 }
