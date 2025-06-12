@@ -109,6 +109,8 @@ hr {
   border-radius: 5px;
   margin-bottom: 15px;
   overflow: hidden;
+  /* Start hidden by default */
+  visibility: hidden;
 }
 .timer-bar {
   height: 100%;
@@ -170,7 +172,7 @@ hr {
   align-items: center;
   border: 2px solid #1a1a2a;
 }
-.main-trainer-controls, .controls button, .guess-btn, #close-how-to-play-btn {
+.main-trainer-controls button, .controls button, .guess-btn, #close-how-to-play-btn {
     border-radius: 8px;
     border: none;
     cursor: pointer;
